@@ -1,0 +1,2 @@
+/usr/bin/ar qc libwebrtc_system_wrappers.a CMakeFiles/webrtc_system_wrappers.dir/source/clock.cc.o CMakeFiles/webrtc_system_wrappers.dir/source/cpu_features.cc.o CMakeFiles/webrtc_system_wrappers.dir/source/field_trial.cc.o CMakeFiles/webrtc_system_wrappers.dir/source/metrics.cc.o CMakeFiles/webrtc_system_wrappers.dir/source/rtp_to_ntp_estimator.cc.o CMakeFiles/webrtc_system_wrappers.dir/source/sleep.cc.o
+/usr/bin/ranlib libwebrtc_system_wrappers.a

@@ -20,26 +20,23 @@ public:
     Apm_Wrapper();
     ~Apm_Wrapper();
 
-    // Initialize with specific stream config
-    bool Initialize(int sample_rate_hz = 8000, int num_channels = 1);
-
-    // Process methods
+    bool Initialize(int sample_rate_hz, int num_channels);
     void ApmProcessNearEnd(int16_t* input, int16_t* output);
     void ApmProcessFarEnd(int16_t* input, int16_t* output);
-
-    // Resampling methods
-    void DownSampleNearEnd(int16_t* input, int16_t* output);
-    void DownSampleFarEnd(int16_t* input, int16_t* output);
-    void UpSampleNearEnd(int16_t* input, int16_t* output);
-    void UpSampleFarEnd(int16_t* input, int16_t* output);
-
-    // Configuration methods
     void SetStreamDelay(int delay_ms);
+    void SetAnalogLevel(int level);
+    int GetRecommendedAnalogLevel() const;
+
+    bool ProcessStream(int16_t* audio_frame);
+
     void SetEchoControllerEnabled(bool enabled);
     void SetNoiseSuppressionEnabled(bool enabled);
     void SetGainControlEnabled(bool enabled);
-    void SetAnalogLevel(int level);
-    int GetRecommendedAnalogLevel() const;
+
+    void DownSampleNearEnd(int16_t* input, int16_t* output);
+    void UpSampleNearEnd(int16_t* input, int16_t* output);
+    void DownSampleFarEnd(int16_t* input, int16_t* output);
+    void UpSampleFarEnd(int16_t* input, int16_t* output);
 
 private:
     void configureAPM();

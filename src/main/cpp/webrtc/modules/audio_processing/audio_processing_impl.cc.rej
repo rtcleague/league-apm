@@ -1,0 +1,26 @@
+--- src/main/cpp/webrtc/modules/audio_processing/audio_processing_impl.cc.orig
++++ src/main/cpp/webrtc/modules/audio_processing/audio_processing_impl.cc
+@@ -14,7 +14,7 @@
+ #include <memory>
+ #include <string>
+ #include <utility>
+-#include <android/log.h>
++#include "../../../utils/logging_macros.h"
+ 
+ namespace webrtc {
+ 
+@@ -22,11 +22,11 @@ namespace {
+ 
+ void LogError(const char* message) {
+-    __android_log_print(ANDROID_LOG_ERROR, "WebRTC", "%s", message);
++    LOGE("%s", message);
+ }
+ 
+ void LogInfo(const char* message) {
+-    __android_log_print(ANDROID_LOG_INFO, "WebRTC", "%s", message);
++    LOGI("%s", message);
+ }
+ 
+ void LogDebug(const char* message) {
+-    __android_log_print(ANDROID_LOG_DEBUG, "WebRTC", "%s", message);
++    LOGD("%s", message);

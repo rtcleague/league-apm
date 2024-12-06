@@ -1682,6 +1682,19 @@ webrtc_system_wrappers/fast:
 	$(MAKE) $(MAKESILENT) -f webrtc/system_wrappers/CMakeFiles/webrtc_system_wrappers.dir/build.make webrtc/system_wrappers/CMakeFiles/webrtc_system_wrappers.dir/build
 .PHONY : webrtc_system_wrappers/fast
 
+#=============================================================================
+# Target rules for targets named webrtc_api
+
+# Build rule for target.
+webrtc_api: cmake_check_build_system
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/Makefile2 webrtc_api
+.PHONY : webrtc_api
+
+# fast build rule for target.
+webrtc_api/fast:
+	$(MAKE) $(MAKESILENT) -f webrtc/api/CMakeFiles/webrtc_api.dir/build.make webrtc/api/CMakeFiles/webrtc_api.dir/build
+.PHONY : webrtc_api/fast
+
 main_driver/jni/APMConfig_jni.o: main_driver/jni/APMConfig_jni.cpp.o
 .PHONY : main_driver/jni/APMConfig_jni.o
 
@@ -1878,6 +1891,7 @@ help:
 	@echo "... throw_delegate"
 	@echo "... time"
 	@echo "... time_zone"
+	@echo "... webrtc_api"
 	@echo "... webrtc_internal"
 	@echo "... webrtc_modules"
 	@echo "... webrtc_modules_avx2"

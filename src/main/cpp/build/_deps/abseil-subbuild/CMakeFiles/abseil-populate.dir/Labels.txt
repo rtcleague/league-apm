@@ -1,0 +1,14 @@
+# Target labels
+ abseil-populate
+# Source files and their labels
+/mnt/d/Projects/DND/caretalk-webrtc-apm/src/main/cpp/build/_deps/abseil-subbuild/CMakeFiles/abseil-populate
+/mnt/d/Projects/DND/caretalk-webrtc-apm/src/main/cpp/build/_deps/abseil-subbuild/CMakeFiles/abseil-populate.rule
+/mnt/d/Projects/DND/caretalk-webrtc-apm/src/main/cpp/build/_deps/abseil-subbuild/CMakeFiles/abseil-populate-complete.rule
+/mnt/d/Projects/DND/caretalk-webrtc-apm/src/main/cpp/build/_deps/abseil-subbuild/abseil-populate-prefix/src/abseil-populate-stamp/abseil-populate-build.rule
+/mnt/d/Projects/DND/caretalk-webrtc-apm/src/main/cpp/build/_deps/abseil-subbuild/abseil-populate-prefix/src/abseil-populate-stamp/abseil-populate-configure.rule
+/mnt/d/Projects/DND/caretalk-webrtc-apm/src/main/cpp/build/_deps/abseil-subbuild/abseil-populate-prefix/src/abseil-populate-stamp/abseil-populate-download.rule
+/mnt/d/Projects/DND/caretalk-webrtc-apm/src/main/cpp/build/_deps/abseil-subbuild/abseil-populate-prefix/src/abseil-populate-stamp/abseil-populate-install.rule
+/mnt/d/Projects/DND/caretalk-webrtc-apm/src/main/cpp/build/_deps/abseil-subbuild/abseil-populate-prefix/src/abseil-populate-stamp/abseil-populate-mkdir.rule
+/mnt/d/Projects/DND/caretalk-webrtc-apm/src/main/cpp/build/_deps/abseil-subbuild/abseil-populate-prefix/src/abseil-populate-stamp/abseil-populate-patch.rule
+/mnt/d/Projects/DND/caretalk-webrtc-apm/src/main/cpp/build/_deps/abseil-subbuild/abseil-populate-prefix/src/abseil-populate-stamp/abseil-populate-test.rule
+/mnt/d/Projects/DND/caretalk-webrtc-apm/src/main/cpp/build/_deps/abseil-subbuild/abseil-populate-prefix/src/abseil-populate-stamp/abseil-populate-update.rule

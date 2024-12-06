@@ -1,0 +1,46 @@
+{
+	"sources" : 
+	[
+		{
+			"file" : "/mnt/d/Projects/DND/caretalk-webrtc-apm/src/main/cpp/build/_deps/abseil-subbuild/CMakeFiles/abseil-populate"
+		},
+		{
+			"file" : "/mnt/d/Projects/DND/caretalk-webrtc-apm/src/main/cpp/build/_deps/abseil-subbuild/CMakeFiles/abseil-populate.rule"
+		},
+		{
+			"file" : "/mnt/d/Projects/DND/caretalk-webrtc-apm/src/main/cpp/build/_deps/abseil-subbuild/CMakeFiles/abseil-populate-complete.rule"
+		},
+		{
+			"file" : "/mnt/d/Projects/DND/caretalk-webrtc-apm/src/main/cpp/build/_deps/abseil-subbuild/abseil-populate-prefix/src/abseil-populate-stamp/abseil-populate-build.rule"
+		},
+		{
+			"file" : "/mnt/d/Projects/DND/caretalk-webrtc-apm/src/main/cpp/build/_deps/abseil-subbuild/abseil-populate-prefix/src/abseil-populate-stamp/abseil-populate-configure.rule"
+		},
+		{
+			"file" : "/mnt/d/Projects/DND/caretalk-webrtc-apm/src/main/cpp/build/_deps/abseil-subbuild/abseil-populate-prefix/src/abseil-populate-stamp/abseil-populate-download.rule"
+		},
+		{
+			"file" : "/mnt/d/Projects/DND/caretalk-webrtc-apm/src/main/cpp/build/_deps/abseil-subbuild/abseil-populate-prefix/src/abseil-populate-stamp/abseil-populate-install.rule"
+		},
+		{
+			"file" : "/mnt/d/Projects/DND/caretalk-webrtc-apm/src/main/cpp/build/_deps/abseil-subbuild/abseil-populate-prefix/src/abseil-populate-stamp/abseil-populate-mkdir.rule"
+		},
+		{
+			"file" : "/mnt/d/Projects/DND/caretalk-webrtc-apm/src/main/cpp/build/_deps/abseil-subbuild/abseil-populate-prefix/src/abseil-populate-stamp/abseil-populate-patch.rule"
+		},
+		{
+			"file" : "/mnt/d/Projects/DND/caretalk-webrtc-apm/src/main/cpp/build/_deps/abseil-subbuild/abseil-populate-prefix/src/abseil-populate-stamp/abseil-populate-test.rule"
+		},
+		{
+			"file" : "/mnt/d/Projects/DND/caretalk-webrtc-apm/src/main/cpp/build/_deps/abseil-subbuild/abseil-populate-prefix/src/abseil-populate-stamp/abseil-populate-update.rule"
+		}
+	],
+	"target" : 
+	{
+		"labels" : 
+		[
+			"abseil-populate"
+		],
+		"name" : "abseil-populate"
+	}
+}

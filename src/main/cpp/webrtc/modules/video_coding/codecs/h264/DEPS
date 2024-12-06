@@ -1,0 +1,5 @@
+include_rules = [
+  "+webrtc.third_party/ffmpeg",
+  "+webrtc.third_party/openh264",
+  "+media/base",
+]

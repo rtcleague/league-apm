@@ -12,6 +12,8 @@ Date: 27/11/2024
 #include "../utils/logging_macros.h"
 #include "rtc_base/ref_counted_object.h"
 #include "common_audio/resampler/include/push_resampler.h"
+#include "modules/audio_processing/include/audio_processing.h"
+#include "rtc_base/logging.h"
 
 using rtc::scoped_refptr;
 
@@ -113,6 +115,17 @@ void Apm_Wrapper::DownSampleFarEnd(int16_t* input, int16_t* output) {
 
 void Apm_Wrapper::UpSampleFarEnd(int16_t* input, int16_t* output) {
     far_resampler_.Resample(input, 160, output, 480);
+}
+
+bool Apm_Wrapper::ProcessStream(int16_t* audio_frame) {
+    if (!apm_) return false;
+
+    webrtc::StreamConfig stream_config(capture_config.sample_rate_hz(), capture_config.num_channels());
+    if (apm_->ProcessStream(audio_frame, stream_config, stream_config, audio_frame) != 0) {
+        RTC_LOG(LS_ERROR) << "ProcessStream() failed!";
+        return false;
+    }
+    return true;
 }
 
 

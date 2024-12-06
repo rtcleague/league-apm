@@ -1,0 +1,2 @@
+/usr/bin/ar qc libwebrtc_modules_avx2.a CMakeFiles/webrtc_modules_avx2.dir/audio_processing/aec3/vector_math_avx2.cc.o
+/usr/bin/ranlib libwebrtc_modules_avx2.a
