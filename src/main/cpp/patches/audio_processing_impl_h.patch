@@ -1,0 +1,12 @@
+--- a/modules/audio_processing/audio_processing_impl.h
++++ b/modules/audio_processing/audio_processing_impl.h
+@@ -43,7 +43,8 @@
+ #include <memory>
+ #include <vector>
+ 
+-#include "../webrtc/rtc_base/synchronization/mutex.h"
++#include "rtc_base/synchronization/mutex.h"
++#include "rtc_base/synchronization/mutex_lock.h"
+ #include "modules/audio_processing/include/audio_processing.h"
+ 
+ namespace webrtc { 

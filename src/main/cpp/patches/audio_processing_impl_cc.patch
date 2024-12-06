@@ -1,0 +1,19 @@
+--- a/modules/audio_processing/audio_processing_impl.cc
++++ b/modules/audio_processing/audio_processing_impl.cc
+@@ -8,12 +8,14 @@
+ 
+ #include "modules/audio_processing/audio_processing_impl.h"
+ #include "rtc_base/checks.h"
++#include "rtc_base/constructor_magic.h"
+ #include "rtc_base/logging.h"
+ #include "rtc_base/synchronization/mutex.h"
++#include "rtc_base/synchronization/mutex_lock.h"
+ 
+ namespace webrtc {
+-using ::webrtc::Mutex;
+-using ::webrtc::MutexLock;
++using webrtc::Mutex;
++using webrtc::MutexLock;
+ 
+ AudioProcessingImpl::AudioProcessingImpl()
+     : mutex_render_(new Mutex()),

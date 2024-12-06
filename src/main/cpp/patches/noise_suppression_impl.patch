@@ -1,0 +1,23 @@
+--- a/modules/audio_processing/noise_suppression_impl.cc
++++ b/modules/audio_processing/noise_suppression_impl.cc
+@@ -8,9 +8,10 @@
+ 
+ #include "modules/audio_processing/noise_suppression_impl.h"
+ #include "rtc_base/checks.h"
+-#include "webrtc/base/constructormagic.h"
+ #include "rtc_base/logging.h"
+ #include "rtc_base/synchronization/mutex.h"
++#include "rtc_base/synchronization/mutex_lock.h"
++#include "rtc_base/constructor_magic.h"
+ 
+ namespace webrtc {
+ 
+@@ -18,7 +19,7 @@ namespace {
+ const int kMinSampleRateHz = 8000;
+ }  // namespace
+ 
+-NoiseSuppressionImpl::NoiseSuppressionImpl(rtc::CriticalSection* crit)
++NoiseSuppressionImpl::NoiseSuppressionImpl(Mutex* mutex)
+     : mutex_(mutex) {}
+ 
+ NoiseSuppressionImpl::~NoiseSuppressionImpl() {}

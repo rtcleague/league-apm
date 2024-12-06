@@ -1,0 +1,11 @@
+--- a/modules/audio_processing/audio_processing_impl.cc
++++ b/modules/audio_processing/audio_processing_impl.cc
+@@ -319,7 +319,7 @@
+     return 0;
+ }
+ 
+-int MutexLock::lock_capture(&mutex_capture_);
++webrtc::MutexLock lock_capture(&mutex_capture_);
+ 
+ int AudioProcessingImpl::Initialize(const ProcessingConfig& processing_config) {
+     webrtc::MutexLock lock_render(&mutex_render_);

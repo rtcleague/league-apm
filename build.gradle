@@ -1,0 +1,115 @@
+plugins {
+    id 'java'
+    id 'application'
+}
+
+group = 'com.care.audio'
+version = '1.0-SNAPSHOT'
+
+repositories {
+    mavenCentral()
+}
+
+sourceSets {
+    main {
+        java {
+            srcDirs = ['src/main/java']
+        }
+        resources {
+            srcDirs = ['src/main/resources']
+        }
+    }
+    test {
+        resources {
+            srcDirs = ['src/test/resources']
+        }
+    }
+}
+
+jar {
+    manifest {
+        attributes(
+            'Main-Class': 'com.care.audio.WavFileProcessor'
+        )
+    }
+    from {
+        configurations.runtimeClasspath.collect { it.isDirectory() ? it : zipTree(it) }
+    }
+    duplicatesStrategy = DuplicatesStrategy.INCLUDE
+    
+    // Add this to see what's being included in the JAR
+    doLast {
+        println "JAR contents:"
+        configurations.runtimeClasspath.each { println it }
+        sourceSets.main.output.files.each { println it }
+    }
+}
+
+application {
+    mainClass = 'com.care.audio.WavFileProcessor'
+    
+    // Add this configuration for the run task
+    applicationDefaultJvmArgs = [
+        "-Djava.library.path=${projectDir}/src/main/cpp/build/lib"
+    ]
+}
+
+compileJava {
+    options.encoding = 'UTF-8'
+    sourceCompatibility = '11'
+    targetCompatibility = '11'
+    
+    // Add this to see what's being compiled
+    doFirst {
+        println "Compiling Java sources from:"
+        source.each { println it }
+    }
+}
+
+task buildNative(type: Exec) {
+    workingDir 'src/main/cpp'
+    commandLine 'bash', '-c', '''
+        rm -rf build
+        mkdir -p build
+        cd build
+        cmake -DCMAKE_BUILD_TYPE=Debug ..
+        make -j6 VERBOSE=1
+        mkdir -p ../../resources
+        cp lib/libcare_audio_processing.so ../../resources/
+    '''
+}
+
+tasks.withType(JavaCompile) {
+    dependsOn buildNative
+}
+
+// Make sure the jar task depends on buildNative
+jar.dependsOn buildNative
+
+// Add a task to list JAR contents
+task listJar {
+    dependsOn jar
+    doLast {
+        def jarFile = file("build/libs/care-audio-processing-1.0-SNAPSHOT.jar")
+        if (jarFile.exists()) {
+            println "JAR file exists at: ${jarFile.absolutePath}"
+            def process = "jar tvf ${jarFile.absolutePath}".execute()
+            println process.text
+        } else {
+            println "JAR file not found at: ${jarFile.absolutePath}"
+        }
+    }
+}
+
+// Also add this to ensure the run task has the correct environment
+run {
+    dependsOn buildNative
+    
+    // Set environment variables
+    environment "LD_LIBRARY_PATH", "${projectDir}/src/main/cpp/build/lib"
+    
+    // Add the arguments for the WAV files
+    if (project.hasProperty("appArgs")) {
+        args Eval.me(appArgs)
+    }
+} 

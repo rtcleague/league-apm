@@ -1,0 +1,11 @@
+rootProject.name = 'care-audio-processing'
+
+// Enable build cache
+gradle.settingsEvaluated { settings ->
+    settings.buildCache {
+        local {
+            directory = new File(rootDir, 'build-cache')
+            removeUnusedEntriesAfterDays = 30
+        }
+    }
+} 

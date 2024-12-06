@@ -1,0 +1,33 @@
+cmake_minimum_required(VERSION 3.10)
+project(care_audio_processing)
+
+set(CMAKE_CXX_STANDARD 17)
+set(CMAKE_CXX_STANDARD_REQUIRED ON)
+
+find_package(JNI REQUIRED)
+include_directories(${JNI_INCLUDE_DIRS})
+
+# Include directories for your project
+include_directories(
+    ${PROJECT_SOURCE_DIR}/main_driver/include
+    ${PROJECT_SOURCE_DIR}/main_driver/jni
+    ${PROJECT_SOURCE_DIR}/webrtc_include
+    # Add other include directories as needed
+)
+
+# Add source files
+file(GLOB_RECURSE SOURCE_FILES
+    "main_driver/src/*.cpp"
+    "main_driver/jni/*.cpp"
+    "jni/*.cpp"
+    "native-lib.cpp"
+    # Add other source directories as needed
+)
+
+add_library(care_audio_processing SHARED ${SOURCE_FILES})
+
+# Link libraries
+target_link_libraries(care_audio_processing
+    ${JNI_LIBRARIES}
+    # Add other libraries as needed, e.g., webrtc, abseil
+) 
