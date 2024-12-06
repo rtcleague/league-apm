@@ -5,17 +5,24 @@ set(CMAKE_CXX_STANDARD 17)
 
 set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -DWEBRTC_POSIX -O0")
 
+# Define AVX2 source files
+set(AVX2_SOURCES
+    "${CMAKE_CURRENT_SOURCE_DIR}/modules/audio_processing/aec3/adaptive_fir_filter_avx2.cc"
+    "${CMAKE_CURRENT_SOURCE_DIR}/modules/audio_processing/aec3/adaptive_fir_filter_erl_avx2.cc"
+    "${CMAKE_CURRENT_SOURCE_DIR}/modules/audio_processing/aec3/fft_data_avx2.cc"
+    "${CMAKE_CURRENT_SOURCE_DIR}/modules/audio_processing/aec3/matched_filter_avx2.cc"
+    "${CMAKE_CURRENT_SOURCE_DIR}/modules/audio_processing/aec3/vector_math_avx2.cc"
+)
+
 # Function to set AVX2 flags for specific files
 function(set_avx2_flags target)
     if(CMAKE_CXX_COMPILER_ID MATCHES "GNU|Clang")
-        set_source_files_properties(
-            "${CMAKE_CURRENT_SOURCE_DIR}/modules/audio_processing/aec3/adaptive_fir_filter_avx2.cc"
-            "${CMAKE_CURRENT_SOURCE_DIR}/modules/audio_processing/aec3/adaptive_fir_filter_erl_avx2.cc"
-            "${CMAKE_CURRENT_SOURCE_DIR}/modules/audio_processing/aec3/fft_data_avx2.cc"
-            "${CMAKE_CURRENT_SOURCE_DIR}/modules/audio_processing/aec3/matched_filter_avx2.cc"
-            "${CMAKE_CURRENT_SOURCE_DIR}/modules/audio_processing/aec3/vector_math_avx2.cc"
-            PROPERTIES COMPILE_FLAGS "-mavx2 -mfma"
-        )
+        foreach(source_file ${AVX2_SOURCES})
+            set_source_files_properties(
+                ${source_file}
+                PROPERTIES COMPILE_FLAGS "-mavx2 -mfma -march=haswell"
+            )
+        endforeach()
     endif()
 endfunction()
 
@@ -216,7 +223,7 @@ target_include_directories(webrtc_internal PUBLIC
     ${CMAKE_CURRENT_SOURCE_DIR}/p2p
 )
 
-# Set compile options for webrtc_internal
+# Set compile options for webrtc_internal with base x86 flags
 target_compile_options(webrtc_internal PRIVATE
     -fno-rtti
     -fno-exceptions
@@ -227,6 +234,12 @@ target_compile_options(webrtc_internal PRIVATE
     -Wno-unused-parameter
     -msse2
     -msse4.1
+    -DWEBRTC_ENABLE_AVX2
+)
+
+# Add AVX2 compile definition
+target_compile_definitions(webrtc_internal PRIVATE
+    WEBRTC_ENABLE_AVX2=1
 )
 
 # Link required libraries
