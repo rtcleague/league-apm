@@ -75,8 +75,25 @@ task buildNative(type: Exec) {
         cmake -DCMAKE_BUILD_TYPE=Debug ..
         make -j6 VERBOSE=1
         mkdir -p lib
-        cp libcare_audio_processing.so lib/
+        cp lib/libcare_audio_processing.so lib/ || true  # Ignore if file already exists
+        ls -la lib/  # Debug: List contents of lib directory
     '''
+    
+    // Add error handling
+    ignoreExitValue = true
+    
+    doLast {
+        def exitValue = executionResult.get().exitValue
+        if (exitValue != 0) {
+            throw new GradleException("Native build failed with exit code $exitValue")
+        }
+        
+        // Verify the .so file exists
+        def soFile = new File("${workingDir}/build/lib/libcare_audio_processing.so")
+        if (!soFile.exists()) {
+            throw new GradleException("Native library not found at ${soFile.absolutePath}")
+        }
+    }
 }
 
 tasks.withType(JavaCompile) {
@@ -111,5 +128,30 @@ run {
     // Add the arguments for the WAV files
     if (project.hasProperty("appArgs")) {
         args Eval.me(appArgs)
+    }
+    
+    // Add default arguments if none provided
+    if (!project.hasProperty("appArgs")) {
+        args = ["src/test/resources/audio/nearend_mono.wav", 
+                "src/test/resources/audio/farend.wav",
+                "src/test/resources/audio/output.wav"]
+    }
+    
+    // Add error handling
+    doFirst {
+        // Check if input files exist
+        args.take(2).each { String path ->
+            def file = new File(path)
+            if (!file.exists()) {
+                throw new GradleException("Input file not found: ${file.absolutePath}")
+            }
+        }
+        
+        // Check if native library exists
+        def libPath = "${projectDir}/src/main/cpp/build/lib/libcare_audio_processing.so"
+        def libFile = new File(libPath)
+        if (!libFile.exists()) {
+            throw new GradleException("Native library not found at ${libPath}")
+        }
     }
 } 
