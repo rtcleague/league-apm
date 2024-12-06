@@ -137,8 +137,7 @@ target_link_libraries(webrtc_internal
     webrtc_rtc_base
     webrtc_api
     webrtc_system_wrappers
-    absl::optional
-    absl_types
+    _deps/abseil-build/absl/types/libabsl_bad_optional_access.a
     pthread
     dl
 )

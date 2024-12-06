@@ -41,14 +41,28 @@ target_link_libraries(care_audio_processing PRIVATE
     absl::base
     absl::synchronization
     absl::strings
-    absl::types
-    absl::optional
     ${JNI_LIBRARIES}
     pthread
     dl
     rt
     m
     stdc++
+    _deps/abseil-build/absl/types/libabsl_bad_optional_access.a
+    _deps/abseil-build/absl/synchronization/libabsl_graphcycles_internal.a
+    _deps/abseil-build/absl/debugging/libabsl_stacktrace.a
+    _deps/abseil-build/absl/debugging/libabsl_symbolize.a
+    _deps/abseil-build/absl/base/libabsl_malloc_internal.a
+    _deps/abseil-build/absl/debugging/libabsl_debugging_internal.a
+    _deps/abseil-build/absl/debugging/libabsl_demangle_internal.a
+    _deps/abseil-build/absl/time/libabsl_time.a
+    _deps/abseil-build/absl/strings/libabsl_strings_internal.a
+    _deps/abseil-build/absl/base/libabsl_spinlock_wait.a
+    _deps/abseil-build/absl/base/libabsl_throw_delegate.a
+    _deps/abseil-build/absl/base/libabsl_raw_logging_internal.a
+    _deps/abseil-build/absl/base/libabsl_log_severity.a
+    _deps/abseil-build/absl/numeric/libabsl_int128.a
+    _deps/abseil-build/absl/time/libabsl_civil_time.a
+    _deps/abseil-build/absl/time/libabsl_time_zone.a
 )
 
 # Set output directory
