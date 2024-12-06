@@ -63,14 +63,12 @@ set(COMMON_AUDIO_SOURCES
     "${CMAKE_CURRENT_SOURCE_DIR}/common_audio/vad/vad_gmm.c"
     "${CMAKE_CURRENT_SOURCE_DIR}/common_audio/vad/vad_sp.c"
     "${CMAKE_CURRENT_SOURCE_DIR}/common_audio/vad/webrtc_vad.c"
-    "${CMAKE_CURRENT_SOURCE_DIR}/common_audio/fft/fft.cc"
+    "${CMAKE_CURRENT_SOURCE_DIR}/common_audio/real_fourier.cc"
+    "${CMAKE_CURRENT_SOURCE_DIR}/common_audio/real_fourier_ooura.cc"
+    "${CMAKE_CURRENT_SOURCE_DIR}/common_audio/window_generator.cc"
     "${CMAKE_CURRENT_SOURCE_DIR}/common_audio/third_party/ooura/fft_size_128/ooura_fft.cc"
-    "${CMAKE_CURRENT_SOURCE_DIR}/common_audio/third_party/ooura/fft_size_256/ooura_fft.cc"
-    "${CMAKE_CURRENT_SOURCE_DIR}/common_audio/third_party/ooura/fft_size_512/ooura_fft.cc"
-    "${CMAKE_CURRENT_SOURCE_DIR}/common_audio/third_party/ooura/fft_size_1024/ooura_fft.cc"
-    "${CMAKE_CURRENT_SOURCE_DIR}/common_audio/third_party/ooura/fft_size_2048/ooura_fft.cc"
-    "${CMAKE_CURRENT_SOURCE_DIR}/common_audio/fft/fft_unittest.cc"
-    "${CMAKE_CURRENT_SOURCE_DIR}/common_audio/fft/fft_test.cc"
+    "${CMAKE_CURRENT_SOURCE_DIR}/common_audio/third_party/ooura/fft_size_128/ooura_fft_sse2.cc"
+    "${CMAKE_CURRENT_SOURCE_DIR}/common_audio/third_party/ooura/fft_size_256/fft4g.cc"
 )
 
 # Create common_audio library
@@ -81,8 +79,11 @@ target_include_directories(webrtc_common_audio PUBLIC
     ${abseil_BINARY_DIR}
     ${CMAKE_CURRENT_SOURCE_DIR}/common_audio/include
     ${CMAKE_CURRENT_SOURCE_DIR}/common_audio/third_party/ooura
-    ${CMAKE_CURRENT_SOURCE_DIR}/common_audio/fft
+    ${CMAKE_CURRENT_SOURCE_DIR}/common_audio/third_party/ooura/fft_size_128
+    ${CMAKE_CURRENT_SOURCE_DIR}/common_audio/third_party/ooura/fft_size_256
+    ${CMAKE_CURRENT_SOURCE_DIR}/common_audio/signal_processing/include
 )
+
 target_compile_options(webrtc_common_audio PRIVATE
     -fno-rtti
     -fno-exceptions
@@ -96,6 +97,7 @@ target_compile_options(webrtc_common_audio PRIVATE
 # Add compile definitions for FFT
 target_compile_definitions(webrtc_common_audio PRIVATE
     WEBRTC_USE_BUILTIN_FFT=1
+    WEBRTC_ARCH_X86_FAMILY
 )
 
 # Add subdirectories for WebRTC components
