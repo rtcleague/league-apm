@@ -41,6 +41,8 @@ target_link_libraries(care_audio_processing PRIVATE
     absl::base
     absl::synchronization
     absl::strings
+    absl::types
+    absl::optional
     ${JNI_LIBRARIES}
     pthread
     dl

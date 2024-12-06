@@ -138,7 +138,7 @@ target_link_libraries(webrtc_internal
     webrtc_api
     webrtc_system_wrappers
     absl::optional
-    absl::types
+    absl_types
     pthread
     dl
 )
