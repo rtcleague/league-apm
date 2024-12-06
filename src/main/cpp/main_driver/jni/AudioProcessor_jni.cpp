@@ -6,7 +6,7 @@
 // Helper class to manage WebRTC APM lifecycle
 class AudioProcessorHandle {
 public:
-    AudioProcessorHandle(int sample_rate_hz) {
+    AudioProcessorHandle() {
         webrtc::AudioProcessing::Config config;
         
         // Configure Echo Cancellation
@@ -33,8 +33,8 @@ public:
         // Apply configuration
         apm_->ApplyConfig(config);
 
-        // Set up audio format
-        stream_config_ = webrtc::StreamConfig(sample_rate_hz, 1, false);
+        // Set up audio format (8kHz mono)
+        stream_config_ = webrtc::StreamConfig(8000, 1, false);
     }
 
     webrtc::AudioProcessing* getApm() { return apm_.get(); }
@@ -45,38 +45,17 @@ private:
     webrtc::StreamConfig stream_config_;
 };
 
-// Convert Java byte array to float array
-void byteArrayToFloat(JNIEnv* env, jbyteArray input, float* output, int length) {
-    jbyte* bytes = env->GetByteArrayElements(input, nullptr);
-    for (int i = 0; i < length/2; i++) {
-        int16_t sample = (bytes[i*2] & 0xFF) | (bytes[i*2 + 1] << 8);
-        output[i] = static_cast<float>(sample) / 32768.0f;
-    }
-    env->ReleaseByteArrayElements(input, bytes, JNI_ABORT);
-}
-
-// Convert float array to Java byte array
-void floatToByteArray(JNIEnv* env, const float* input, jbyteArray output, int length) {
-    jbyte* bytes = env->GetByteArrayElements(output, nullptr);
-    for (int i = 0; i < length/2; i++) {
-        int16_t sample = static_cast<int16_t>(input[i] * 32768.0f);
-        bytes[i*2] = sample & 0xFF;
-        bytes[i*2 + 1] = (sample >> 8) & 0xFF;
-    }
-    env->ReleaseByteArrayElements(output, bytes, 0);
-}
-
 extern "C" {
 
 /*
  * Class:     com_care_audio_AudioProcessor
- * Method:    createNativeProcessor
- * Signature: (I)J
+ * Method:    nativeInit
+ * Signature: ()J
  */
-JNIEXPORT jlong JNICALL Java_com_care_audio_AudioProcessor_createNativeProcessor
-  (JNIEnv* env, jobject thiz, jint sample_rate) {
+JNIEXPORT jlong JNICALL Java_com_care_audio_AudioProcessor_nativeInit
+  (JNIEnv* env, jobject thiz) {
     try {
-        auto* handle = new AudioProcessorHandle(sample_rate);
+        auto* handle = new AudioProcessorHandle();
         return reinterpret_cast<jlong>(handle);
     } catch (const std::exception& e) {
         return 0;
@@ -85,70 +64,58 @@ JNIEXPORT jlong JNICALL Java_com_care_audio_AudioProcessor_createNativeProcessor
 
 /*
  * Class:     com_care_audio_AudioProcessor
- * Method:    destroyNativeProcessor
- * Signature: (J)V
+ * Method:    nativeProcess
+ * Signature: (J[S[S)V
  */
-JNIEXPORT void JNICALL Java_com_care_audio_AudioProcessor_destroyNativeProcessor
-  (JNIEnv* env, jobject thiz, jlong handle) {
-    if (handle) {
-        auto* processor = reinterpret_cast<AudioProcessorHandle*>(handle);
-        delete processor;
-    }
-}
-
-/*
- * Class:     com_care_audio_AudioProcessor
- * Method:    processFrameNative
- * Signature: (J[B[B[B)I
- */
-JNIEXPORT jint JNICALL Java_com_care_audio_AudioProcessor_processFrameNative
-  (JNIEnv* env, jobject thiz, jlong handle, jbyteArray nearend, jbyteArray farend, jbyteArray output) {
-    if (!handle) return -1;
+JNIEXPORT void JNICALL Java_com_care_audio_AudioProcessor_nativeProcess
+  (JNIEnv* env, jobject thiz, jlong handle, jshortArray nearend, jshortArray farend) {
+    if (!handle) return;
 
     auto* processor = reinterpret_cast<AudioProcessorHandle*>(handle);
     auto* apm = processor->getApm();
     const auto& config = processor->getConfig();
 
-    // Get array lengths
-    jsize nearend_len = env->GetArrayLength(nearend);
-    jsize farend_len = env->GetArrayLength(farend);
-    jsize output_len = env->GetArrayLength(output);
-
-    // Verify buffer sizes
-    int samples = nearend_len / 2;  // 2 bytes per sample
-    if (samples * 2 != nearend_len || samples * 2 != farend_len || samples * 2 != output_len) {
-        return -1;
-    }
-
+    // Get array elements
+    jshort* nearend_data = env->GetShortArrayElements(nearend, nullptr);
+    jshort* farend_data = env->GetShortArrayElements(farend, nullptr);
+    
     try {
-        // Convert input buffers to float
-        std::vector<float> nearend_float(samples);
-        std::vector<float> farend_float(samples);
-        byteArrayToFloat(env, nearend, nearend_float.data(), nearend_len);
-        byteArrayToFloat(env, farend, farend_float.data(), farend_len);
-
-        // Create float pointers array for WebRTC API
-        const float* farend_ptr = farend_float.data();
-        float* nearend_ptr = nearend_float.data();
-        const float* const farend_array[] = {&farend_ptr[0]};
-        float* const nearend_array[] = {&nearend_ptr[0]};
-
         // Process farend first (reference signal)
-        if (apm->ProcessReverseStream(farend_array, config, config, nearend_array) != 0) {
-            return -1;
+        if (apm->ProcessReverseStream(
+                reinterpret_cast<const int16_t*>(farend_data),
+                config,
+                config,
+                reinterpret_cast<int16_t*>(farend_data)) != 0) {
+            // Handle error
         }
 
         // Process nearend (captured signal)
-        if (apm->ProcessStream(nearend_array, config, config, nearend_array) != 0) {
-            return -1;
+        if (apm->ProcessStream(
+                reinterpret_cast<const int16_t*>(nearend_data),
+                config,
+                config,
+                reinterpret_cast<int16_t*>(nearend_data)) != 0) {
+            // Handle error
         }
-
-        // Convert output back to bytes
-        floatToByteArray(env, nearend_float.data(), output, output_len);
-
-        return output_len;
     } catch (const std::exception& e) {
-        return -1;
+        // Handle error
+    }
+
+    // Release arrays
+    env->ReleaseShortArrayElements(nearend, nearend_data, 0);
+    env->ReleaseShortArrayElements(farend, farend_data, JNI_ABORT);
+}
+
+/*
+ * Class:     com_care_audio_AudioProcessor
+ * Method:    nativeDestroy
+ * Signature: (J)V
+ */
+JNIEXPORT void JNICALL Java_com_care_audio_AudioProcessor_nativeDestroy
+  (JNIEnv* env, jobject thiz, jlong handle) {
+    if (handle) {
+        auto* processor = reinterpret_cast<AudioProcessorHandle*>(handle);
+        delete processor;
     }
 }
 

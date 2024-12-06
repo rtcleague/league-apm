@@ -36,19 +36,10 @@ jar {
         configurations.runtimeClasspath.collect { it.isDirectory() ? it : zipTree(it) }
     }
     duplicatesStrategy = DuplicatesStrategy.INCLUDE
-    
-    // Add this to see what's being included in the JAR
-    doLast {
-        println "JAR contents:"
-        configurations.runtimeClasspath.each { println it }
-        sourceSets.main.output.files.each { println it }
-    }
 }
 
 application {
     mainClass = 'com.care.audio.Main'
-    
-    // Add this configuration for the run task
     applicationDefaultJvmArgs = [
         "-Djava.library.path=${projectDir}/src/main/cpp/build/lib"
     ]
@@ -58,118 +49,62 @@ compileJava {
     options.encoding = 'UTF-8'
     sourceCompatibility = '11'
     targetCompatibility = '11'
-    
-    // Add this to see what's being compiled
-    doFirst {
-        println "Compiling Java sources from:"
-        source.each { println it }
-    }
 }
 
-// Add task to generate JNI headers
-task generateJniHeaders(type: Exec) {
-    dependsOn compileJava
+// Task to generate JNI headers
+task generateJniHeaders(type: JavaCompile) {
+    source = sourceSets.main.java.srcDirs
+    classpath = sourceSets.main.compileClasspath
+    destinationDirectory = file("${buildDir}/generated/jni")
+    options.compilerArgs += ['-h', file("src/main/cpp/main_driver/jni")]
     
-    workingDir projectDir
-    commandLine 'bash', '-c', """
-        cd src/main/cpp/main_driver/jni
-        javac -h . ../../../../java/com/care/audio/AudioProcessor.java
-    """
-    
-    doFirst {
-        mkdir 'src/main/cpp/main_driver/jni'
-    }
+    // Only compile AudioProcessor.java for header generation
+    include '**/AudioProcessor.java'
 }
 
+// Task to build native code
 task buildNative(type: Exec) {
-    dependsOn generateJniHeaders
-    
     workingDir 'src/main/cpp'
     commandLine 'bash', '-c', '''
         rm -rf build
         mkdir -p build
         cd build
         cmake -DCMAKE_BUILD_TYPE=Debug ..
-        make -j6 VERBOSE=1
+        make -j6
         mkdir -p lib
-        # No need to copy, the file is already in the right place
         ls -la lib/  # Debug: List contents of lib directory
     '''
     
-    // Add error handling
-    ignoreExitValue = true
-    
     doLast {
-        def exitValue = executionResult.get().exitValue
-        if (exitValue != 0) {
-            throw new GradleException("Native build failed with exit code $exitValue")
-        }
-        
-        // Verify the .so file exists
         def soFile = new File("${workingDir}/build/lib/libcare_audio_processing.so")
         if (!soFile.exists()) {
             throw new GradleException("Native library not found at ${soFile.absolutePath}")
         }
-        
-        // Print debug information
-        println "Native library path: ${soFile.absolutePath}"
-        println "Library exists: ${soFile.exists()}"
-        println "Library can read: ${soFile.canRead()}"
+        println "Native library exists at: ${soFile.absolutePath}"
     }
 }
 
-tasks.withType(JavaCompile) {
-    dependsOn buildNative
-}
+// Fix task dependencies
+generateJniHeaders.dependsOn.clear()  // Clear existing dependencies
+buildNative.dependsOn generateJniHeaders
+compileJava.dependsOn buildNative
 
-// Make sure the jar task depends on buildNative
-jar.dependsOn buildNative
-
-// Add a task to list JAR contents
-task listJar {
-    dependsOn jar
-    doLast {
-        def jarFile = file("build/libs/care-audio-processing-1.0-SNAPSHOT.jar")
-        if (jarFile.exists()) {
-            println "JAR file exists at: ${jarFile.absolutePath}"
-            def process = "jar tvf ${jarFile.absolutePath}".execute()
-            println process.text
-        } else {
-            println "JAR file not found at: ${jarFile.absolutePath}"
-        }
-    }
-}
-
-// Also add this to ensure the run task has the correct environment
+// Run task configuration
 run {
     dependsOn buildNative
     
-    // Set environment variables
     environment "LD_LIBRARY_PATH", "${projectDir}/src/main/cpp/build/lib"
     
-    // Add the arguments for the WAV files
     if (project.hasProperty("appArgs")) {
         args Eval.me(appArgs)
-    }
-    
-    // Add default arguments if none provided
-    if (!project.hasProperty("appArgs")) {
+    } else {
         args = ["src/test/resources/audio/nearend_mono.wav", 
                 "src/test/resources/audio/farend.wav",
                 "src/test/resources/audio/output.wav"]
     }
     
-    // Add error handling
     doFirst {
-        // Check if input files exist
-        args.take(2).each { String path ->
-            def file = new File(path)
-            if (!file.exists()) {
-                throw new GradleException("Input file not found: ${file.absolutePath}")
-            }
-        }
-        
-        // Check if native library exists and print debug info
+        // Check if native library exists
         def libPath = "${projectDir}/src/main/cpp/build/lib/libcare_audio_processing.so"
         def libFile = new File(libPath)
         println "Checking native library at: ${libPath}"
@@ -179,6 +114,14 @@ run {
         
         if (!libFile.exists()) {
             throw new GradleException("Native library not found at ${libPath}")
+        }
+        
+        // Check if input files exist
+        args.take(2).each { String path ->
+            def file = new File(path)
+            if (!file.exists()) {
+                throw new GradleException("Input file not found: ${file.absolutePath}")
+            }
         }
     }
 } 

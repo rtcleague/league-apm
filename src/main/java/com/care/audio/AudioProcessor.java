@@ -25,7 +25,7 @@ public class AudioProcessor implements AutoCloseable {
     public AudioProcessor(int sampleRate) {
         this.sampleRate = sampleRate;
         this.frameSize = (sampleRate * 10) / 1000; // 10ms frame size
-        this.nativeHandle = createNativeProcessor(sampleRate);
+        this.nativeHandle = nativeInit();
         if (this.nativeHandle == 0) {
             throw new RuntimeException("Failed to create native audio processor");
         }
@@ -47,17 +47,32 @@ public class AudioProcessor implements AutoCloseable {
                 String.format("Buffer sizes must be %d bytes (10ms at %dHz)", expectedSize, sampleRate));
         }
 
-        int result = processFrameNative(nativeHandle, nearend, farend, output);
-        if (result < 0) {
-            throw new RuntimeException("Failed to process audio frame");
+        // Convert byte arrays to short arrays
+        short[] nearendShorts = new short[frameSize];
+        short[] farendShorts = new short[frameSize];
+        
+        // Convert bytes to shorts
+        for (int i = 0; i < frameSize; i++) {
+            nearendShorts[i] = (short) ((nearend[i*2] & 0xFF) | (nearend[i*2 + 1] << 8));
+            farendShorts[i] = (short) ((farend[i*2] & 0xFF) | (farend[i*2 + 1] << 8));
         }
-        return result;
+
+        // Process audio
+        nativeProcess(nativeHandle, nearendShorts, farendShorts);
+
+        // Convert shorts back to bytes
+        for (int i = 0; i < frameSize; i++) {
+            output[i*2] = (byte) (nearendShorts[i] & 0xFF);
+            output[i*2 + 1] = (byte) ((nearendShorts[i] >> 8) & 0xFF);
+        }
+
+        return frameSize * 2;
     }
 
     @Override
     public void close() {
         if (!isClosed) {
-            destroyNativeProcessor(nativeHandle);
+            nativeDestroy(nativeHandle);
             isClosed = true;
             nativeHandle = 0;
         }
@@ -73,7 +88,7 @@ public class AudioProcessor implements AutoCloseable {
     }
 
     // Native methods
-    private native long createNativeProcessor(int sampleRate);
-    private native void destroyNativeProcessor(long handle);
-    private native int processFrameNative(long handle, byte[] nearend, byte[] farend, byte[] output);
+    private native long nativeInit();
+    private native void nativeProcess(long handle, short[] nearend, short[] farend);
+    private native void nativeDestroy(long handle);
 } 
