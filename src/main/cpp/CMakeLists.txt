@@ -38,6 +38,11 @@ add_library(care_audio_processing SHARED
 # Link libraries
 target_link_libraries(care_audio_processing PRIVATE
     webrtc_internal
+    webrtc_modules
+    webrtc_rtc_base
+    webrtc_api
+    webrtc_system_wrappers
+    webrtc_common_audio
     absl::base
     absl::synchronization
     absl::strings
