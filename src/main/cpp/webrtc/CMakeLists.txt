@@ -5,6 +5,20 @@ set(CMAKE_CXX_STANDARD 17)
 
 set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -DWEBRTC_POSIX -O0")
 
+# Function to set AVX2 flags for specific files
+function(set_avx2_flags target)
+    if(CMAKE_CXX_COMPILER_ID MATCHES "GNU|Clang")
+        set_source_files_properties(
+            "${CMAKE_CURRENT_SOURCE_DIR}/modules/audio_processing/aec3/adaptive_fir_filter_avx2.cc"
+            "${CMAKE_CURRENT_SOURCE_DIR}/modules/audio_processing/aec3/adaptive_fir_filter_erl_avx2.cc"
+            "${CMAKE_CURRENT_SOURCE_DIR}/modules/audio_processing/aec3/fft_data_avx2.cc"
+            "${CMAKE_CURRENT_SOURCE_DIR}/modules/audio_processing/aec3/matched_filter_avx2.cc"
+            "${CMAKE_CURRENT_SOURCE_DIR}/modules/audio_processing/aec3/vector_math_avx2.cc"
+            PROPERTIES COMPILE_FLAGS "-mavx2 -mfma"
+        )
+    endif()
+endfunction()
+
 # Add Abseil include directories
 include_directories(
     ${CMAKE_CURRENT_SOURCE_DIR}
@@ -181,6 +195,9 @@ set(WEBRTC_SOURCES
 # Create the internal library that combines all WebRTC components
 add_library(webrtc_internal STATIC ${WEBRTC_SOURCES})
 
+# Apply AVX2 flags to specific files
+set_avx2_flags(webrtc_internal)
+
 # Update target properties
 target_include_directories(webrtc_internal PUBLIC
     ${CMAKE_CURRENT_SOURCE_DIR}
@@ -208,6 +225,8 @@ target_compile_options(webrtc_internal PRIVATE
     -Wall
     -Wextra
     -Wno-unused-parameter
+    -msse2
+    -msse4.1
 )
 
 # Link required libraries
