@@ -140,8 +140,6 @@ target_link_libraries(webrtc_internal
     absl::base
     absl::synchronization
     absl::strings
-    absl::types
-    absl::optional
     absl::bad_optional_access
     pthread
     dl
