@@ -29,7 +29,7 @@ sourceSets {
 jar {
     manifest {
         attributes(
-            'Main-Class': 'com.care.audio.WavFileProcessor'
+            'Main-Class': 'com.care.audio.Main'
         )
     }
     from {
@@ -46,7 +46,7 @@ jar {
 }
 
 application {
-    mainClass = 'com.care.audio.WavFileProcessor'
+    mainClass = 'com.care.audio.Main'
     
     // Add this configuration for the run task
     applicationDefaultJvmArgs = [
@@ -74,8 +74,8 @@ task buildNative(type: Exec) {
         cd build
         cmake -DCMAKE_BUILD_TYPE=Debug ..
         make -j6 VERBOSE=1
-        mkdir -p ../../resources
-        cp lib/libcare_audio_processing.so ../../resources/
+        mkdir -p lib
+        cp libcare_audio_processing.so lib/
     '''
 }
 
