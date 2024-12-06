@@ -25,26 +25,24 @@ public:
         config.high_pass_filter.enabled = true;
 
         // Create APM instance
-        apm = webrtc::AudioProcessingBuilder().Create();
-        if (!apm) {
+        apm_.reset(webrtc::AudioProcessingBuilder().Create());
+        if (!apm_) {
             throw std::runtime_error("Failed to create APM instance");
         }
 
         // Apply configuration
-        apm->ApplyConfig(config);
+        apm_->ApplyConfig(config);
 
         // Set up audio format
-        stream_config.sample_rate_hz = sample_rate_hz;
-        stream_config.num_channels = 1;  // Mono
-        stream_config.has_keyboard = false;
+        stream_config_ = webrtc::StreamConfig(sample_rate_hz, 1, false);
     }
 
-    webrtc::AudioProcessing* getApm() { return apm.get(); }
-    const webrtc::StreamConfig& getConfig() const { return stream_config; }
+    webrtc::AudioProcessing* getApm() { return apm_.get(); }
+    const webrtc::StreamConfig& getConfig() const { return stream_config_; }
 
 private:
-    std::unique_ptr<webrtc::AudioProcessing> apm;
-    webrtc::StreamConfig stream_config;
+    std::unique_ptr<webrtc::AudioProcessing> apm_;
+    webrtc::StreamConfig stream_config_;
 };
 
 // Convert Java byte array to float array
@@ -124,13 +122,19 @@ JNIEXPORT jint JNICALL Java_com_care_audio_AudioProcessor_processFrameNative
         byteArrayToFloat(env, nearend, nearend_float.data(), nearend_len);
         byteArrayToFloat(env, farend, farend_float.data(), farend_len);
 
+        // Create float pointers array for WebRTC API
+        const float* farend_ptr = farend_float.data();
+        float* nearend_ptr = nearend_float.data();
+        const float* const farend_array[] = {&farend_ptr[0]};
+        float* const nearend_array[] = {&nearend_ptr[0]};
+
         // Process farend first (reference signal)
-        if (apm->ProcessReverseStream(farend_float.data(), config, config, farend_float.data()) != 0) {
+        if (apm->ProcessReverseStream(farend_array, config, config, nearend_array) != 0) {
             return -1;
         }
 
         // Process nearend (captured signal)
-        if (apm->ProcessStream(nearend_float.data(), config, config, nearend_float.data()) != 0) {
+        if (apm->ProcessStream(nearend_array, config, config, nearend_array) != 0) {
             return -1;
         }
 
