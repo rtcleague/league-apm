@@ -94,6 +94,10 @@ set(WEBRTC_SOURCES
     "${CMAKE_CURRENT_SOURCE_DIR}/modules/audio_processing/residual_echo_detector.cc"
 )
 
+# Filter out Android-specific files
+list(FILTER WEBRTC_SOURCES EXCLUDE REGEX ".*android.*")
+list(FILTER WEBRTC_SOURCES EXCLUDE REGEX ".*sdk/android.*")
+
 # Create the internal library that combines all WebRTC components
 add_library(webrtc_internal STATIC ${WEBRTC_SOURCES})
 
