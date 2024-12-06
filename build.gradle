@@ -75,7 +75,7 @@ task buildNative(type: Exec) {
         cmake -DCMAKE_BUILD_TYPE=Debug ..
         make -j6 VERBOSE=1
         mkdir -p lib
-        cp lib/libcare_audio_processing.so lib/ || true  # Ignore if file already exists
+        # No need to copy, the file is already in the right place
         ls -la lib/  # Debug: List contents of lib directory
     '''
     
@@ -93,6 +93,11 @@ task buildNative(type: Exec) {
         if (!soFile.exists()) {
             throw new GradleException("Native library not found at ${soFile.absolutePath}")
         }
+        
+        // Print debug information
+        println "Native library path: ${soFile.absolutePath}"
+        println "Library exists: ${soFile.exists()}"
+        println "Library can read: ${soFile.canRead()}"
     }
 }
 
@@ -147,9 +152,14 @@ run {
             }
         }
         
-        // Check if native library exists
+        // Check if native library exists and print debug info
         def libPath = "${projectDir}/src/main/cpp/build/lib/libcare_audio_processing.so"
         def libFile = new File(libPath)
+        println "Checking native library at: ${libPath}"
+        println "Library exists: ${libFile.exists()}"
+        println "Library can read: ${libFile.canRead()}"
+        println "LD_LIBRARY_PATH: ${System.getenv('LD_LIBRARY_PATH')}"
+        
         if (!libFile.exists()) {
             throw new GradleException("Native library not found at ${libPath}")
         }

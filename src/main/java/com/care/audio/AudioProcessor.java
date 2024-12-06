@@ -19,7 +19,7 @@ public class AudioProcessor implements AutoCloseable {
     private boolean isClosed = false;
 
     static {
-        System.loadLibrary("audio_processor");
+        System.loadLibrary("care_audio_processing");
     }
 
     public AudioProcessor(int sampleRate) {
