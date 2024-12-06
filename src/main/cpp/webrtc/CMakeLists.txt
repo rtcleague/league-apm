@@ -37,29 +37,8 @@ add_definitions(
     -DABSL_ALLOCATOR_NOTHROW
 )
 
-# Exclude Android-specific files for Linux x86_64 build
-list(FILTER webrtc_rtc_base_sources EXCLUDE REGEX ".*android.*")
-list(FILTER webrtc_rtc_base_sources EXCLUDE REGEX ".*sdk/android.*")
-
-# Add subdirectories for WebRTC components
-add_subdirectory(${CMAKE_CURRENT_SOURCE_DIR}/modules)
-add_subdirectory(${CMAKE_CURRENT_SOURCE_DIR}/rtc_base)
-add_subdirectory(${CMAKE_CURRENT_SOURCE_DIR}/system_wrappers)
-add_subdirectory(${CMAKE_CURRENT_SOURCE_DIR}/api)
-
-# Define WebRTC source files - only include files we have
-set(WEBRTC_SOURCES
-    "${CMAKE_CURRENT_SOURCE_DIR}/modules/audio_processing/aec3/adaptive_fir_filter.cc"
-    "${CMAKE_CURRENT_SOURCE_DIR}/modules/audio_processing/aec3/aec3_common.cc"
-    "${CMAKE_CURRENT_SOURCE_DIR}/modules/audio_processing/aec3/block_framer.cc"
-    "${CMAKE_CURRENT_SOURCE_DIR}/modules/audio_processing/aec3/block_processor.cc"
-    "${CMAKE_CURRENT_SOURCE_DIR}/modules/audio_processing/aec3/comfort_noise_generator.cc"
-    "${CMAKE_CURRENT_SOURCE_DIR}/modules/audio_processing/aec3/echo_canceller3.cc"
-    "${CMAKE_CURRENT_SOURCE_DIR}/modules/audio_processing/aec3/echo_path_delay_estimator.cc"
-    "${CMAKE_CURRENT_SOURCE_DIR}/modules/audio_processing/aec3/echo_remover.cc"
-    "${CMAKE_CURRENT_SOURCE_DIR}/modules/audio_processing/aec3/frame_blocker.cc"
-    "${CMAKE_CURRENT_SOURCE_DIR}/modules/audio_processing/aec3/render_delay_buffer.cc"
-    "${CMAKE_CURRENT_SOURCE_DIR}/modules/audio_processing/aec3/render_delay_controller.cc"
+# Define common audio sources
+set(COMMON_AUDIO_SOURCES
     "${CMAKE_CURRENT_SOURCE_DIR}/common_audio/audio_converter.cc"
     "${CMAKE_CURRENT_SOURCE_DIR}/common_audio/audio_util.cc"
     "${CMAKE_CURRENT_SOURCE_DIR}/common_audio/channel_buffer.cc"
@@ -84,6 +63,44 @@ set(WEBRTC_SOURCES
     "${CMAKE_CURRENT_SOURCE_DIR}/common_audio/vad/vad_gmm.c"
     "${CMAKE_CURRENT_SOURCE_DIR}/common_audio/vad/vad_sp.c"
     "${CMAKE_CURRENT_SOURCE_DIR}/common_audio/vad/webrtc_vad.c"
+)
+
+# Create common_audio library
+add_library(webrtc_common_audio STATIC ${COMMON_AUDIO_SOURCES})
+target_include_directories(webrtc_common_audio PUBLIC
+    ${CMAKE_CURRENT_SOURCE_DIR}
+    ${abseil_SOURCE_DIR}
+    ${abseil_BINARY_DIR}
+)
+target_compile_options(webrtc_common_audio PRIVATE
+    -fno-rtti
+    -fno-exceptions
+    -fvisibility=hidden
+    -fvisibility-inlines-hidden
+    -Wall
+    -Wextra
+    -Wno-unused-parameter
+)
+
+# Add subdirectories for WebRTC components
+add_subdirectory(${CMAKE_CURRENT_SOURCE_DIR}/modules)
+add_subdirectory(${CMAKE_CURRENT_SOURCE_DIR}/rtc_base)
+add_subdirectory(${CMAKE_CURRENT_SOURCE_DIR}/system_wrappers)
+add_subdirectory(${CMAKE_CURRENT_SOURCE_DIR}/api)
+
+# Define WebRTC source files - only include files we have
+set(WEBRTC_SOURCES
+    "${CMAKE_CURRENT_SOURCE_DIR}/modules/audio_processing/aec3/adaptive_fir_filter.cc"
+    "${CMAKE_CURRENT_SOURCE_DIR}/modules/audio_processing/aec3/aec3_common.cc"
+    "${CMAKE_CURRENT_SOURCE_DIR}/modules/audio_processing/aec3/block_framer.cc"
+    "${CMAKE_CURRENT_SOURCE_DIR}/modules/audio_processing/aec3/block_processor.cc"
+    "${CMAKE_CURRENT_SOURCE_DIR}/modules/audio_processing/aec3/comfort_noise_generator.cc"
+    "${CMAKE_CURRENT_SOURCE_DIR}/modules/audio_processing/aec3/echo_canceller3.cc"
+    "${CMAKE_CURRENT_SOURCE_DIR}/modules/audio_processing/aec3/echo_path_delay_estimator.cc"
+    "${CMAKE_CURRENT_SOURCE_DIR}/modules/audio_processing/aec3/echo_remover.cc"
+    "${CMAKE_CURRENT_SOURCE_DIR}/modules/audio_processing/aec3/frame_blocker.cc"
+    "${CMAKE_CURRENT_SOURCE_DIR}/modules/audio_processing/aec3/render_delay_buffer.cc"
+    "${CMAKE_CURRENT_SOURCE_DIR}/modules/audio_processing/aec3/render_delay_controller.cc"
     "${CMAKE_CURRENT_SOURCE_DIR}/rtc_base/platform_thread_types.cc"
     "${CMAKE_CURRENT_SOURCE_DIR}/modules/audio_processing/audio_processing_impl.cc"
     "${CMAKE_CURRENT_SOURCE_DIR}/modules/audio_processing/audio_buffer.cc"
@@ -93,10 +110,6 @@ set(WEBRTC_SOURCES
     "${CMAKE_CURRENT_SOURCE_DIR}/modules/audio_processing/high_pass_filter.cc"
     "${CMAKE_CURRENT_SOURCE_DIR}/modules/audio_processing/residual_echo_detector.cc"
 )
-
-# Filter out Android-specific files
-list(FILTER WEBRTC_SOURCES EXCLUDE REGEX ".*android.*")
-list(FILTER WEBRTC_SOURCES EXCLUDE REGEX ".*sdk/android.*")
 
 # Create the internal library that combines all WebRTC components
 add_library(webrtc_internal STATIC ${WEBRTC_SOURCES})
@@ -137,6 +150,7 @@ target_link_libraries(webrtc_internal
     webrtc_rtc_base
     webrtc_api
     webrtc_system_wrappers
+    webrtc_common_audio
     absl::base
     absl::synchronization
     absl::strings
