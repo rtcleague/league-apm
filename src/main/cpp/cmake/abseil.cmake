@@ -8,4 +8,11 @@ FetchContent_Declare(
 
 set(ABSL_PROPAGATE_CXX_STD ON)
 set(ABSL_ENABLE_INSTALL ON)
-FetchContent_MakeAvailable(abseil) 
+set(BUILD_TESTING OFF)
+set(ABSL_USE_EXTERNAL_GOOGLETEST OFF)
+set(ABSL_FIND_GOOGLETEST OFF)
+
+FetchContent_MakeAvailable(abseil)
+
+# Add include directories for Abseil
+include_directories(${abseil_SOURCE_DIR} ${abseil_BINARY_DIR}) 
