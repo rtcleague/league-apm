@@ -12,40 +12,68 @@ Date: 27/11/2024
 
 package com.care.audio;
 
-public class AudioProcessor {
-    static {
-        System.loadLibrary("care_audio_processing");
-    }
-
+public class AudioProcessor implements AutoCloseable {
     private long nativeHandle;
-    private static final int FRAME_SIZE = 80; // 10ms at 8kHz
+    private final int sampleRate;
+    private final int frameSize;
+    private boolean isClosed = false;
 
-    public AudioProcessor() {
-        nativeHandle = createNativeProcessor();
+    static {
+        System.loadLibrary("audio_processor");
     }
 
-    /**
-     * Process a frame of audio data
-     * @param input Input audio frame (PCM 16-bit, 8kHz, mono)
-     * @param output Output buffer for processed audio (same format as input)
-     * @return Number of bytes written to output buffer
-     */
-    public int processFrame(byte[] input, byte[] output) {
-        if (input.length != FRAME_SIZE * 2) { // 2 bytes per sample
-            throw new IllegalArgumentException(
-                "Input buffer must be exactly 10ms of audio (" + 
-                FRAME_SIZE * 2 + " bytes)");
+    public AudioProcessor(int sampleRate) {
+        this.sampleRate = sampleRate;
+        this.frameSize = (sampleRate * 10) / 1000; // 10ms frame size
+        this.nativeHandle = createNativeProcessor(sampleRate);
+        if (this.nativeHandle == 0) {
+            throw new RuntimeException("Failed to create native audio processor");
         }
-        return processFrameNative(nativeHandle, input, output);
+    }
+
+    public int processFrame(byte[] nearend, byte[] farend, byte[] output) {
+        if (isClosed) {
+            throw new IllegalStateException("AudioProcessor is closed");
+        }
+        
+        // Verify buffer sizes
+        if (nearend == null || farend == null || output == null) {
+            throw new IllegalArgumentException("Input and output buffers cannot be null");
+        }
+        
+        int expectedSize = frameSize * 2; // 2 bytes per sample
+        if (nearend.length != expectedSize || farend.length != expectedSize || output.length != expectedSize) {
+            throw new IllegalArgumentException(
+                String.format("Buffer sizes must be %d bytes (10ms at %dHz)", expectedSize, sampleRate));
+        }
+
+        int result = processFrameNative(nativeHandle, nearend, farend, output);
+        if (result < 0) {
+            throw new RuntimeException("Failed to process audio frame");
+        }
+        return result;
+    }
+
+    @Override
+    public void close() {
+        if (!isClosed) {
+            destroyNativeProcessor(nativeHandle);
+            isClosed = true;
+            nativeHandle = 0;
+        }
     }
 
     @Override
     protected void finalize() throws Throwable {
-        destroyNativeProcessor(nativeHandle);
-        super.finalize();
+        try {
+            close();
+        } finally {
+            super.finalize();
+        }
     }
 
-    private native long createNativeProcessor();
+    // Native methods
+    private native long createNativeProcessor(int sampleRate);
     private native void destroyNativeProcessor(long handle);
-    private native int processFrameNative(long handle, byte[] input, byte[] output);
+    private native int processFrameNative(long handle, byte[] nearend, byte[] farend, byte[] output);
 } 
