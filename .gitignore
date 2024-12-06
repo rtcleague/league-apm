@@ -93,7 +93,7 @@ cmake-build-*/
 
 ### Audio ###
 *.mp3
-*.wav
+!*.wav
 *.mp4
 
 ### Exclude .a and .so files in src/main/cpp ###

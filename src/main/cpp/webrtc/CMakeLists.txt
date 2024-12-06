@@ -5,17 +5,36 @@ set(CMAKE_CXX_STANDARD 17)
 
 set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -DWEBRTC_POSIX -O0")
 
+# Add Abseil include directories
+include_directories(
+    ${CMAKE_CURRENT_SOURCE_DIR}
+    ${abseil_SOURCE_DIR}
+    ${abseil_BINARY_DIR}
+    ${CMAKE_CURRENT_SOURCE_DIR}/abseil-cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/audio
+    ${CMAKE_CURRENT_SOURCE_DIR}/api
+    ${CMAKE_CURRENT_SOURCE_DIR}/call
+    ${CMAKE_CURRENT_SOURCE_DIR}/common_audio
+    ${CMAKE_CURRENT_SOURCE_DIR}/logging
+    ${CMAKE_CURRENT_SOURCE_DIR}/modules
+    ${CMAKE_CURRENT_SOURCE_DIR}/rtc_base
+    ${CMAKE_CURRENT_SOURCE_DIR}/system_wrappers
+    ${CMAKE_CURRENT_SOURCE_DIR}/third_party
+    ${CMAKE_CURRENT_SOURCE_DIR}/media
+    ${CMAKE_CURRENT_SOURCE_DIR}/p2p
+)
+
 add_definitions(
-        -DWEBRTC_USE_BUILTIN_ISAC_FIX=1
-        -DWEBRTC_USE_BUILTIN_ISAC_FLOAT=0
-        -DWEBRTC_APM_DEBUG_DUMP=0
-        -DWEBRTC_OPUS_VARIABLE_COMPLEXITY=1
-        -DWEBRTC_INCLUDE_INTERNAL_AUDIO_DEVICE
-        -DABSL_ALLOCATOR_NOTHROW
-        -DWEBRTC_LINUX
-        -DWEBRTC_POSIX
-        -DWEBRTC_ENABLE_PROTOBUF=0
-        -DWEBRTC_X86_64
+    -DWEBRTC_USE_BUILTIN_ISAC_FIX=1
+    -DWEBRTC_USE_BUILTIN_ISAC_FLOAT=0
+    -DWEBRTC_APM_DEBUG_DUMP=0
+    -DWEBRTC_OPUS_VARIABLE_COMPLEXITY=1
+    -DWEBRTC_INCLUDE_INTERNAL_AUDIO_DEVICE
+    -DABSL_ALLOCATOR_NOTHROW
+    -DWEBRTC_LINUX
+    -DWEBRTC_POSIX
+    -DWEBRTC_ENABLE_PROTOBUF=0
+    -DWEBRTC_X86_64
 )
 
 # Add subdirectories for WebRTC components
@@ -71,29 +90,14 @@ set(WEBRTC_SOURCES
     "${CMAKE_CURRENT_SOURCE_DIR}/modules/audio_processing/residual_echo_detector.cc"
 )
 
-include_directories(
-        ${CMAKE_CURRENT_SOURCE_DIR}
-        ${CMAKE_CURRENT_SOURCE_DIR}/abseil-cpp
-        ${CMAKE_CURRENT_SOURCE_DIR}/audio
-        ${CMAKE_CURRENT_SOURCE_DIR}/api
-        ${CMAKE_CURRENT_SOURCE_DIR}/call
-        ${CMAKE_CURRENT_SOURCE_DIR}/common_audio
-        ${CMAKE_CURRENT_SOURCE_DIR}/logging
-        ${CMAKE_CURRENT_SOURCE_DIR}/modules
-        ${CMAKE_CURRENT_SOURCE_DIR}/rtc_base
-        ${CMAKE_CURRENT_SOURCE_DIR}/system_wrappers
-        ${CMAKE_CURRENT_SOURCE_DIR}/third_party
-        ${CMAKE_CURRENT_SOURCE_DIR}/media
-        ${CMAKE_CURRENT_SOURCE_DIR}/p2p
-)
-
 # Create the internal library that combines all WebRTC components
 add_library(webrtc_internal STATIC ${WEBRTC_SOURCES})
 
 # Update target properties
 target_include_directories(webrtc_internal PUBLIC
     ${CMAKE_CURRENT_SOURCE_DIR}
-#    ${CMAKE_CURRENT_SOURCE_DIR}/abseil-cpp
+    ${abseil_SOURCE_DIR}
+    ${abseil_BINARY_DIR}
     ${CMAKE_CURRENT_SOURCE_DIR}/audio
     ${CMAKE_CURRENT_SOURCE_DIR}/api
     ${CMAKE_CURRENT_SOURCE_DIR}/call
@@ -125,6 +129,8 @@ target_link_libraries(webrtc_internal
     webrtc_rtc_base
     webrtc_api
     webrtc_system_wrappers
+    absl::optional
+    absl::types
     pthread
     dl
 )
