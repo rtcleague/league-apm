@@ -130,7 +130,7 @@ set(SRC_FILES
         synchronization/yield_policy.cc
 #        system/file_wrapper.cc
 #        system/thread_registry.cc
-        ../sdk/android/native_api/stacktrace/stacktrace.cc
+#        ../sdk/android/native_api/stacktrace/stacktrace.cc
         system/warn_current_thread_is_deadlocked.cc
         system_time.cc
         task_queue.cc

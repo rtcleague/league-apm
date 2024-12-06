@@ -1,4 +1,3 @@
-
 //*********************************************************************
 //* C_Base64 - a simple base64 encoder and decoder.
 //*
@@ -14,6 +13,7 @@
 
 #include <string>
 #include <vector>
+#include <cstdint>
 
 #include "rtc_base/system/rtc_export.h"
 

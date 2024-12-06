@@ -25,17 +25,21 @@ include_directories(
 )
 
 add_definitions(
+    -DWEBRTC_POSIX
+    -DWEBRTC_LINUX
+    -DWEBRTC_X86_64
+    -DWEBRTC_APM_DEBUG_DUMP=0
+    -DWEBRTC_ENABLE_PROTOBUF=0
     -DWEBRTC_USE_BUILTIN_ISAC_FIX=1
     -DWEBRTC_USE_BUILTIN_ISAC_FLOAT=0
-    -DWEBRTC_APM_DEBUG_DUMP=0
-    -DWEBRTC_OPUS_VARIABLE_COMPLEXITY=1
     -DWEBRTC_INCLUDE_INTERNAL_AUDIO_DEVICE
+    -DWEBRTC_OPUS_VARIABLE_COMPLEXITY=1
     -DABSL_ALLOCATOR_NOTHROW
-    -DWEBRTC_LINUX
-    -DWEBRTC_POSIX
-    -DWEBRTC_ENABLE_PROTOBUF=0
-    -DWEBRTC_X86_64
 )
+
+# Exclude Android-specific files for Linux x86_64 build
+list(FILTER webrtc_rtc_base_sources EXCLUDE REGEX ".*android.*")
+list(FILTER webrtc_rtc_base_sources EXCLUDE REGEX ".*sdk/android.*")
 
 # Add subdirectories for WebRTC components
 add_subdirectory(${CMAKE_CURRENT_SOURCE_DIR}/modules)
