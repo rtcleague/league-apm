@@ -66,12 +66,15 @@ void floatToByteArray(JNIEnv* env, const float* input, jbyteArray output, int le
     env->ReleaseByteArrayElements(output, bytes, 0);
 }
 
+extern "C" {
+
 /*
  * Class:     com_care_audio_AudioProcessor
  * Method:    createNativeProcessor
+ * Signature: (I)J
  */
 JNIEXPORT jlong JNICALL Java_com_care_audio_AudioProcessor_createNativeProcessor
-  (JNIEnv* env, jobject obj, jint sample_rate) {
+  (JNIEnv* env, jobject thiz, jint sample_rate) {
     try {
         auto* handle = new AudioProcessorHandle(sample_rate);
         return reinterpret_cast<jlong>(handle);
@@ -83,9 +86,10 @@ JNIEXPORT jlong JNICALL Java_com_care_audio_AudioProcessor_createNativeProcessor
 /*
  * Class:     com_care_audio_AudioProcessor
  * Method:    destroyNativeProcessor
+ * Signature: (J)V
  */
 JNIEXPORT void JNICALL Java_com_care_audio_AudioProcessor_destroyNativeProcessor
-  (JNIEnv* env, jobject obj, jlong handle) {
+  (JNIEnv* env, jobject thiz, jlong handle) {
     if (handle) {
         auto* processor = reinterpret_cast<AudioProcessorHandle*>(handle);
         delete processor;
@@ -95,9 +99,10 @@ JNIEXPORT void JNICALL Java_com_care_audio_AudioProcessor_destroyNativeProcessor
 /*
  * Class:     com_care_audio_AudioProcessor
  * Method:    processFrameNative
+ * Signature: (J[B[B[B)I
  */
 JNIEXPORT jint JNICALL Java_com_care_audio_AudioProcessor_processFrameNative
-  (JNIEnv* env, jobject obj, jlong handle, jbyteArray nearend, jbyteArray farend, jbyteArray output) {
+  (JNIEnv* env, jobject thiz, jlong handle, jbyteArray nearend, jbyteArray farend, jbyteArray output) {
     if (!handle) return -1;
 
     auto* processor = reinterpret_cast<AudioProcessorHandle*>(handle);
@@ -146,3 +151,5 @@ JNIEXPORT jint JNICALL Java_com_care_audio_AudioProcessor_processFrameNative
         return -1;
     }
 }
+
+} // extern "C"

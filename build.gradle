@@ -66,7 +66,24 @@ compileJava {
     }
 }
 
+// Add task to generate JNI headers
+task generateJniHeaders(type: Exec) {
+    dependsOn compileJava
+    
+    workingDir projectDir
+    commandLine 'bash', '-c', """
+        cd src/main/cpp/main_driver/jni
+        javac -h . ../../../../java/com/care/audio/AudioProcessor.java
+    """
+    
+    doFirst {
+        mkdir 'src/main/cpp/main_driver/jni'
+    }
+}
+
 task buildNative(type: Exec) {
+    dependsOn generateJniHeaders
+    
     workingDir 'src/main/cpp'
     commandLine 'bash', '-c', '''
         rm -rf build
